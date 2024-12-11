@@ -1,0 +1,58 @@
+services:
+  bot:
+    build:
+      context: .
+      dockerfile: ./bot/Dockerfile
+    env_file:
+      - .env
+    environment:
+      - API_URL=http://api:8000
+    volumes:
+      - ./:/app
+    restart: always
+    depends_on:
+      - api
+    networks:
+      - backend
+
+  api:
+    build:
+      context: .
+      dockerfile: ./api/Dockerfile
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./:/app
+    restart: always
+    networks:
+      - backend
+
+  database:
+    image: postgres:16.2-bullseye
+    restart: unless-stopped
+    env_file:
+      - ./.env
+    volumes:
+      - game_dev_data:/var/lib/postgresql/data
+    networks:
+#      - game-dev-network
+      - backend
+    expose:
+      - "5432"
+    ports:
+#      - "127.0.0.1:5432:5432"
+      - "5432:5432"
+
+volumes:
+  game_dev_data:
+    driver: local
+
+#networks:
+#  game-dev-network:
+#    driver: bridge
+
+networks:
+  backend:
+    driver: local
