@@ -8,7 +8,7 @@ import requests
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 router = Router()
-API_URL = "http://api:8000"
+API_URL = "http://api:8000/api"
 
 
 # Команда /start
