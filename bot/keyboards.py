@@ -1,11 +1,9 @@
 import aiohttp
-from aiogram.types import (ReplyKeyboardMarkup, KeyboardButton,
-                           InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery)
-from aiogram import Router, F
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
+from aiogram import Router
 from aiogram.types import Message
 from aiogram.filters import CommandStart, Command
 import requests
-from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 router = Router()
 API_URL = "http://api:8000/api"
@@ -23,11 +21,11 @@ async def start_and_auth(message: Message):
         async with session.post(f"{API_URL}/auth", json=data) as response:
             if response.status == 200:
                 result = await response.json()
-                await message.reply("Вы успешно зарегистрированы.")
+                # await message.reply("Вы успешно зарегистрированы.")
             else:
                 await message.reply("Ошибка регистрации")
-    # await message.reply("Привет! Нажми на кнопку ниже:", reply_markup=get_inline_keyboard())
-    await message.reply("Привет! Нажми на кнопку ниже:", reply_markup=main)
+    await message.reply("Welcome! 🎉 I'm your friendly bot, here to assist you. How can I help you today?",
+                        reply_markup=main)
 
 
 # Команда /auth для авторизации
@@ -50,6 +48,22 @@ async def auth_user(message: Message):
             f"Authorized successfully! Your TON Wallet: {user_data['tonWallet']['address']} with balance: {user_data['tonWallet']['balance']}")
     else:
         await message.reply("Authorization failed")
+
+
+@router.message(Command('help'))
+async def help_command(message: Message):
+    help_text = (
+        "Need some assistance? 🆘 No problem! Here are the commands you can use:\n" 
+        "- /start: Start a new session\n" 
+        "- /help: Get help with commands\n" 
+        "- Get list of players: See the list of players\n" 
+        "- Get list of friends: Check out your friends\n" 
+        "- My positions: View your current positions\n" 
+        "- My balance: Check your balance\n" 
+        "- Referral link: Get your referral link\n" 
+        "- My TON Wallet: Access your TON Wallet\n")
+    await message.reply(help_text)
+
 
 
 # Команда /wallet для подключения кошелька
@@ -121,6 +135,18 @@ async def transfer_funds(message: Message):
 
 
 
+@router.callback_query(lambda c: c.data in ['my_positions', 'my_balance', 'referral_link', 'my_ton_wallet'])
+async def own_handle_callback(callback_query: CallbackQuery):
+    code = callback_query.data
+    if code == 'my_positions':
+        await callback_query.message.reply("📈 Let's take a look at your current positions. Here’s how you’re doing.")
+    elif code == 'my_balance':
+        await callback_query.message.reply("💰 Checking your balance... Here's what you have in your account.")
+    elif code == 'referral_link':
+        await callback_query.message.reply("🔗 Here’s your referral link! Share it with friends and get rewards.")
+    elif code == 'my_ton_wallet':
+        await callback_query.message.reply("👜 Accessing your TON Wallet... Here’s your wallet details.")
+
 
 @router.callback_query(lambda c: c.data in ['players_list', 'friends_list'])
 async def process_callback(callback_query: CallbackQuery):
@@ -137,11 +163,17 @@ async def process_callback(callback_query: CallbackQuery):
                         result = await response.json()
                         message = f"Список {endpoint}:\n"
                         for item in result:
-                            message += (f"Имя: {item['full_name']}\n"
-                                        f"Лига: {item['league']}\n"
-                                        f"Монеты: {item['coins']}\n"
-                                        f"Друзья: {'Да' if item['is_friend'] else 'Нет'}\n"
+                            message += (f"Full name: {item['full_name']}\n"
+                                        f"League: {item['league']}\n"
+                                        f"Coins: {item['coins']}\n"
+                                        f"Friends: {'Yes' if item['is_friend'] else 'No'}\n"
                                         "----\n")
+                        if endpoint == "players":
+                            await callback_query.message.reply(
+                                "🏅 Here's the list of players! Let's see who's making waves.")
+                        elif endpoint == "friends":
+                            await callback_query.message.reply(
+                                "👥 Here's your friends list! Connecting you with your circle.")
                         await callback_query.message.answer(message)
                     else:
                         await callback_query.message.answer(f"Ошибка при получении списка {endpoint}")
@@ -152,10 +184,14 @@ async def process_callback(callback_query: CallbackQuery):
 
 
 main = InlineKeyboardMarkup(inline_keyboard=[
-    # [InlineKeyboardButton(text='Получить список игроков', callback_data='catalog')],
     [
-        InlineKeyboardButton(text='Получить список игроков', callback_data='players_list'),
-        InlineKeyboardButton(text='Получить список друзей', callback_data='friends_list'),
-        # InlineKeyboardButton(text='Контакты', callback_data='contacts')
+        InlineKeyboardButton(text='Get list of players', callback_data='players_list'),
+        InlineKeyboardButton(text='Get list of friends', callback_data='friends_list'),
+    ],
+    [InlineKeyboardButton(text='My positions', callback_data='my_positions'),
+        InlineKeyboardButton(text='My balance', callback_data='my_balance'),
+    ],
+    [InlineKeyboardButton(text='Referral link', callback_data='referral_link'),
+        InlineKeyboardButton(text='My TON Wallet', callback_data='my_ton_wallet'),
     ]
 ])

@@ -1,4 +1,3 @@
-# from api.schemas.models import Items, ItemBase, ItemCreate
 from sqlalchemy.orm import Session
 from api.schemas.schemes import UserCreate, WalletCreate, DealCreate, TransferBase, Friend
 import uuid

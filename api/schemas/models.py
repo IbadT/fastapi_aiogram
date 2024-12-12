@@ -1,61 +1,8 @@
-from pydantic import BaseModel
-from sqlalchemy import Column, Integer, String, Float, Boolean, Integer, ForeignKey, DateTime, Table
+from sqlalchemy import Float, Boolean, Integer, ForeignKey, DateTime, Table
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from api.schemas.database import Base
 from sqlalchemy import Column, Integer, String, TIMESTAMP, Boolean, text
 from datetime import datetime
-
-#
-# class Questions(Base):
-#     __tablename__ = 'questions'
-#
-#     id = Column(Integer, primary_key=True, index=True)
-#     question_text = Column(String, index=True)
-#
-# class Choices(Base):
-#     __tablename__ = 'choices'
-#
-#     id = Column(Integer, primary_key=True, index=True)
-#     choice_text = Column(String, index=True)
-#     is_correct = Column(Boolean, default=False)
-#     question_id = Column(Integer, ForeignKey('questions.id'))
-
-
-
-# class Items(Base):
-#     __tablename__ = 'items'
-#
-#     id = Column(Integer, primary_key=True, index=True)
-#     name = Column(String)
-#     description = Column(String)
-#
-# class ItemBase(BaseModel):
-#     name: str
-#     description: str
-#
-# class ItemCreate(ItemBase):
-#     pass
-#
-# class Config:
-#     orm_mode = True
-
-
-
-
-
-#
-# class Post(Base):
-#     __tablename__ = "posts"
-#
-#     id = Column(Integer,primary_key=True,nullable=False, index=True)
-#     title = Column(String,nullable=False)
-#     content = Column(String,nullable=False)
-#     published = Column(Boolean, server_default='TRUE')
-#     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
-#
-
-
-
 
 
 # Промежуточная таблица для отношения "многие ко многим"
@@ -113,10 +60,3 @@ class Deal(Base):
     owner = relationship("User", back_populates="deals")
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-
-
-
-# async def async_main():
-#     async with engine.begin() as session:
-#         await session.run_sync(Base.metadata.create_all)
-
